@@ -1,0 +1,15 @@
+Package: friendlyspots
+Title: Spatial Similarity of Spatial Transcriptomics Samples
+Version: 0.1.0
+Authors@R: c(
+    person("George", "Hall", email = "george.hall@ucl.ac.uk", role = c("aut", "cre"),
+           comment = c(affiliation = "University College London")),
+    person("University College London", role = "cph"))
+Description: Computes the similarity between spatial transcriptomics
+    samples from counts of label-to-label connections between neighboring
+    spots.
+License: GPL (>= 3)
+Imports: stats
+Suggests: testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Encoding: UTF-8
