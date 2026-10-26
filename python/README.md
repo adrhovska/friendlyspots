@@ -2,7 +2,7 @@
 
 
 
-# friendlyspots <img src="../assets/logo.png" align="right" height="139" alt="friendlyspots logo" />
+# friendlyspots <img src="https://raw.githubusercontent.com/george-hall-ucl/friendlyspots/main/assets/logo.png" align="right" height="139" alt="friendlyspots logo" />
 
 Compute similarity between spatial transcriptomics samples based on which
 labels (e.g. cell types) border one another.
@@ -158,7 +158,7 @@ print(samples["anterior_1"].head())
 plot_slices(samples)
 ```
 
-<img src="figures/README-slices-1.png" alt="" width="75%" style="display: block; margin: auto;" />
+<img src="https://raw.githubusercontent.com/george-hall-ucl/friendlyspots/main/python/figures/README-slices-1.png" alt="" width="75%" style="display: block; margin: auto;" />
 
 
 ``` python
@@ -172,7 +172,7 @@ print(sim.round(2))
 plot_similarity(sim)
 ```
 
-<img src="figures/README-similarity-3.png" alt="" width="50%" style="display: block; margin: auto;" />
+<img src="https://raw.githubusercontent.com/george-hall-ucl/friendlyspots/main/python/figures/README-similarity-3.png" alt="" width="50%" style="display: block; margin: auto;" />
 
 ## Citation
 
