@@ -5,7 +5,19 @@
 #' @param normalize Divide each sample's connection counts by their total.
 #' @param pools Optional named list mapping pool names to sample names;
 #'   connection counts are summed within each pool.
-#' @return Symmetric similarity matrix with values in [0, 1].
+#' @return Symmetric similarity matrix with values in \[0, 1\].
+#' @examples
+#' samples <- list(
+#'   a = data.frame(array_row = c(0, 0, 1), array_col = c(0, 2, 1),
+#'                  label = c("x", "y", "x")),
+#'   b = data.frame(array_row = c(0, 0, 0), array_col = c(0, 2, 4),
+#'                  label = c("x", "x", "y")),
+#'   c = data.frame(array_row = c(0, 0), array_col = c(0, 2),
+#'                  label = c("y", "y"))
+#' )
+#' spatial_similarity(samples)
+#' spatial_similarity(samples, pools = list(ab = c("a", "b"), c = "c"))
+#' @importFrom stats dist
 #' @export
 spatial_similarity <- function(samples, normalize = TRUE, pools = NULL) {
   labels <- sort(unique(unlist(lapply(samples, function(s) as.character(s$label)))))
