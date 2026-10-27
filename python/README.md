@@ -51,7 +51,7 @@ Uses four mouse brain sections from 10x Genomics (two anterior, two posterior),
 with each spot labelled by its most enriched of five marker genes.
 
 <details><summary>Setup: download and label the data, define plotting helpers (click to expand)</summary>
-
+### Change Test
 
 ``` python
 # To rebuild this README from README.Rmd, run knitr::knit("README.Rmd") in R
