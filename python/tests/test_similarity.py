@@ -1,5 +1,8 @@
+import io
+
 import numpy as np
 import pandas as pd
+import pytest
 
 from friendlyspots import spatial_similarity
 
@@ -19,6 +22,16 @@ def assert_sim(sim, ab, ac, bc):
 def test_raw_counts():
     sim = spatial_similarity(SAMPLES, normalize=False)
     assert_sim(sim, 1 - np.sqrt(2) / 4, 0, 1 - np.sqrt(10) / 4)
+    # pd.read_csv() turns labels written as NA, nan, None, etc. into NaN
+    csv = pd.read_csv(io.StringIO(
+        "sample,array_row,array_col,label\n"
+        "A,0,0,a\nA,0,2,NA\nA,1,1,a\n"
+        "B,0,0,a\nB,0,2,a\nB,0,4,nan\nB,2,0,nan\n"
+        "C,0,0,None\nC,0,2,None\n"
+    ))
+    from_file = {name: s.drop(columns="sample") for name, s in csv.groupby("sample")}
+    with pytest.warns(UserWarning, match="treated as a label called 'NA'"):
+        pd.testing.assert_frame_equal(spatial_similarity(from_file, normalize=False), sim)
 
 
 def test_normalize():

@@ -20,7 +20,18 @@
 #' @importFrom stats dist
 #' @export
 spatial_similarity <- function(samples, normalize = TRUE, pools = NULL) {
-  labels <- sort(unique(unlist(lapply(samples, function(s) as.character(s$label)))))
+  if (anyNA(unlist(lapply(samples, function(s) as.character(s$label))))) {
+    # e.g. read.csv() reads a label literally called "NA" as missing
+    warning("Some labels are 'NA'. These will be treated as a label called ",
+            "'NA' and used in the comparison, rather than being treated as ",
+            "the absence of a label and dropped.")
+  }
+  samples <- lapply(samples, function(s) {
+    s$label <- ifelse(is.na(s$label), "NA", as.character(s$label))
+    s
+  })
+  # Sorted so floating-point results don't depend on sample order
+  labels <- sort(unique(unlist(lapply(samples, function(s) s$label))))
   counts <- do.call(rbind, lapply(samples, connection_counts, labels = labels))
   if (!is.null(pools)) {
     counts <- do.call(rbind, lapply(pools, function(p) colSums(counts[p, , drop = FALSE])))
