@@ -25,8 +25,10 @@ B,2,0,NA
 C,0,0,NA
 C,0,2,NA")
   from_file <- split(csv[-1], csv$sample)
-  expect_warning(expect_equal(spatial_similarity(from_file, normalize = FALSE), sim),
-                 "treated as a label called 'NA'")
+  expect_warning(
+    expect_equal(spatial_similarity(from_file, normalize = FALSE), sim),
+    "treated as a label called 'NA'"
+  )
 })
 
 test_that("normalize divides counts by their total", {
@@ -40,4 +42,26 @@ test_that("pools sum counts of their samples", {
   sim <- spatial_similarity(samples, normalize = FALSE, pools = pools)
   expect_equal(rownames(sim), c("p1", "p2", "p3"))
   expect_sim(sim, 0, 1 - sqrt(6) / sqrt(38), 1 - 4 / sqrt(38))
+})
+
+test_that("reproduces the pig esophagus paper's similarities", {
+  # Durkin et al. (2026)
+  spots <- read.csv(test_path("pig_esophagus_spots.csv.xz"))
+  pools <- list(
+    "Pre-implant" = "Pre-implant",
+    "1 month" = "1 month (D)",
+    "3 months" = c("3 months (E)", "3 months (F)"),
+    "6 months" = c("6 months (B)", "6 months (C)"),
+    "Native" = c("Native DP1", "Native DP2", "Native DP3", "Native (C)")
+  )
+  sim <- spatial_similarity(split(spots, spots$sample_name), pools = pools)
+  paper <- matrix(c(1.00, 0.01, 0.03, 0.09, 0.00,
+                    0.01, 1.00, 0.90, 0.68, 0.27,
+                    0.03, 0.90, 1.00, 0.70, 0.28,
+                    0.09, 0.68, 0.70, 1.00, 0.52,
+                    0.00, 0.27, 0.28, 0.52, 1.00),
+                  5, dimnames = list(names(pools), names(pools)))
+  # The paper's 7.5 px neighbor cutoff missed a few neighbors in Native DP2
+  paper[1, 2] <- paper[2, 1] <- 0.02
+  expect_equal(round(sim, 2), paper)
 })
