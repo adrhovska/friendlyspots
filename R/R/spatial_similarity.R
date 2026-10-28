@@ -5,7 +5,8 @@
 #' @param normalize Divide each sample's connection counts by their total.
 #' @param pools Optional named list mapping pool names to sample names;
 #'   connection counts are summed within each pool.
-#' @return Symmetric similarity matrix with values in \[0, 1\].
+#' @return Symmetric similarity matrix with values in \[0, 1\], or `NA` for
+#'   samples with no neighboring spots when `normalize = TRUE`.
 #' @examples
 #' samples <- list(
 #'   a = data.frame(array_row = c(0, 0, 1), array_col = c(0, 2, 1),

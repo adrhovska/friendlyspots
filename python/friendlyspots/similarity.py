@@ -15,7 +15,8 @@ def spatial_similarity(samples, normalize=True, pools=None):
     normalize: divide each sample's connection counts by their total.
     pools: optional dict mapping pool names to lists of sample names;
         connection counts are summed within each pool.
-    Returns a symmetric DataFrame of similarities in [0, 1].
+    Returns a symmetric DataFrame of similarities in [0, 1], or NaN for
+    samples with no neighboring spots when normalize=True.
     """
     if any(s["label"].isna().any() for s in samples.values()):
         # e.g. pd.read_csv() reads a label literally called "NA" as missing

@@ -16,7 +16,8 @@ spatial_similarity(samples, normalize = TRUE, pools = NULL)
 connection counts are summed within each pool.}
 }
 \value{
-Symmetric similarity matrix with values in [0, 1].
+Symmetric similarity matrix with values in [0, 1], or \code{NA} for
+samples with no neighboring spots when \code{normalize = TRUE}.
 }
 \description{
 Spatial similarity between spatial transcriptomics samples
