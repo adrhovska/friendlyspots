@@ -31,10 +31,20 @@ def spatial_similarity(samples, normalize=True, pools=None):
     if pools is not None:
         counts = pd.DataFrame({name: counts.loc[members].sum() for name, members in pools.items()}).T
     if normalize:
-        counts = counts.div(counts.sum(axis=1), axis=0)
+        totals = counts.sum(axis=1)
+        if (totals == 0).any():
+            warnings.warn(
+                "Similarities are NA for samples with no neighboring spots: "
+                + ", ".join(map(str, counts.index[totals == 0]))
+            )
+        counts = counts.div(totals, axis=0)
     x = counts.to_numpy(dtype=float)
     d = np.sqrt(((x[:, None, :] - x[None, :, :]) ** 2).sum(axis=2))
-    return pd.DataFrame(1 - d / d.max(), index=counts.index, columns=counts.index)
+    # Identical samples give a max distance of 0, so don't divide by it
+    d_max = np.nanmax(d, initial=0)
+    if d_max > 0:
+        d = d / d_max
+    return pd.DataFrame(1 - d, index=counts.index, columns=counts.index)
 
 
 def _connection_counts(sample, labels):

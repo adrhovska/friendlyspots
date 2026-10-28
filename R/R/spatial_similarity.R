@@ -38,9 +38,21 @@ spatial_similarity <- function(samples, normalize = TRUE, pools = NULL) {
       colSums(counts[p, , drop = FALSE])
     }))
   }
-  if (normalize) counts <- counts / rowSums(counts)
+  if (normalize) {
+    empty <- rowSums(counts) == 0
+    if (any(empty)) {
+      warning("Similarities are NA for samples with no neighboring spots: ",
+              paste(rownames(counts)[empty], collapse = ", "))
+    }
+    counts <- counts / rowSums(counts)
+  }
   d <- as.matrix(dist(counts))
-  1 - d / max(d)
+  # dist() puts 0 on the diagonal even for NA rows
+  diag(d)[is.na(rowSums(counts))] <- NA
+  # Identical samples give a max distance of 0, so don't divide by it
+  d_max <- max(0, d, na.rm = TRUE)
+  if (d_max > 0) d <- d / d_max
+  1 - d
 }
 
 # Hexagonal Visium neighbors in array coordinates.
