@@ -34,7 +34,9 @@ spatial_similarity <- function(samples, normalize = TRUE, pools = NULL) {
   labels <- sort(unique(unlist(lapply(samples, function(s) s$label))))
   counts <- do.call(rbind, lapply(samples, connection_counts, labels = labels))
   if (!is.null(pools)) {
-    counts <- do.call(rbind, lapply(pools, function(p) colSums(counts[p, , drop = FALSE])))
+    counts <- do.call(rbind, lapply(pools, function(p) {
+      colSums(counts[p, , drop = FALSE])
+    }))
   }
   if (normalize) counts <- counts / rowSums(counts)
   d <- as.matrix(dist(counts))
@@ -42,13 +44,13 @@ spatial_similarity <- function(samples, normalize = TRUE, pools = NULL) {
 }
 
 # Hexagonal Visium neighbors in array coordinates.
-HEX_OFFSETS <- list(c(0, -2), c(0, 2), c(-1, -1), c(-1, 1), c(1, -1), c(1, 1))
+hex_offsets <- list(c(0, -2), c(0, 2), c(-1, -1), c(-1, 1), c(1, -1), c(1, 1))
 
 connection_counts <- function(sample, labels) {
   label <- factor(sample$label, levels = labels)
   key <- paste(sample$array_row, sample$array_col)
   counts <- matrix(0, length(labels), length(labels))
-  for (o in HEX_OFFSETS) {
+  for (o in hex_offsets) {
     nbr <- match(paste(sample$array_row + o[1], sample$array_col + o[2]), key)
     hit <- !is.na(nbr)
     counts <- counts + unclass(table(label[hit], label[nbr[hit]]))
