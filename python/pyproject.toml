@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -9,8 +9,16 @@ description = "Spatial similarity of spatial transcriptomics samples"
 readme = "README.md"
 authors = [{ name = "George Hall", email = "george.hall@ucl.ac.uk" }]
 requires-python = ">=3.9"
-license = { text = "GPL-3.0-or-later" }
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 dependencies = ["numpy", "pandas"]
+
+[project.urls]
+Homepage = "https://github.com/george-hall-ucl/friendlyspots"
+Issues = "https://github.com/george-hall-ucl/friendlyspots/issues"
+
+[tool.setuptools]
+packages = ["friendlyspots"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
