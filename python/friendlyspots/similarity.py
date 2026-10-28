@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import pandas as pd
 
@@ -16,6 +18,15 @@ def spatial_similarity(samples, normalize=True, pools=None, radius=105):
         used and for altering radius value.
     Returns a symmetric DataFrame of similarities in [0, 1].
     """
+    if any(s["label"].isna().any() for s in samples.values()):
+        # e.g. pd.read_csv() reads a label literally called "NA" as missing
+        warnings.warn(
+            "Some labels are 'NA'. These will be treated as a label called "
+            "'NA' and used in the comparison, rather than being treated as "
+            "the absence of a label and dropped."
+        )
+    samples = {name: s.assign(label=s["label"].astype(str).where(s["label"].notna(), "NA")) for name, s in samples.items()}
+    # Sorted as set order varies between runs, changing floating-point results
     labels = sorted(set().union(*(s["label"].astype(str) for s in samples.values())))
     counts = pd.DataFrame(
         {name: _connection_counts(s, labels, radius) for name, s in samples.items()}

@@ -13,6 +13,20 @@ expect_sim <- function(sim, ab, ac, bc) {
 test_that("raw counts give 1 - d / max(d)", {
   sim <- spatial_similarity(samples, normalize = FALSE)
   expect_sim(sim, 1 - sqrt(2) / 4, 0, 1 - sqrt(10) / 4)
+  # read.csv() turns a label written as NA into a missing value
+  csv <- read.csv(text = "sample,array_row,array_col,label
+A,0,0,a
+A,0,2,NA
+A,1,1,a
+B,0,0,a
+B,0,2,a
+B,0,4,NA
+B,2,0,NA
+C,0,0,NA
+C,0,2,NA")
+  from_file <- split(csv[-1], csv$sample)
+  expect_warning(expect_equal(spatial_similarity(from_file, normalize = FALSE), sim),
+                 "treated as a label called 'NA'")
 })
 
 test_that("normalize divides counts by their total", {

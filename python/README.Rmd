@@ -1,13 +1,20 @@
 <!-- README.md is generated from README.Rmd with knitr::knit("README.Rmd"). Please edit that file -->
 
 ```{r, include = FALSE}
+# Absolute image URLs so figures also show on PyPI
+knitr::opts_knit$set(base.url = paste0(
+  "https://raw.githubusercontent.com/",
+  "george-hall-ucl/friendlyspots/main/python/"
+))
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", dpi = 150,
                       fig.path = "figures/README-", fig.cap = "",
                       fig.align = "center", out.width = "75%",
                       jupyter_compat = TRUE)
 ```
 
-# friendlyspots <img src="../assets/logo.png" align="right" height="139" alt="friendlyspots logo" />
+<p align="center">
+  <img src="https://raw.githubusercontent.com/george-hall-ucl/friendlyspots/main/assets/logo.gif" width="210" alt="friendlyspots logo">
+</p>
 
 Compute similarity between spatial transcriptomics samples based on which
 labels (e.g. cell types) border one another.
