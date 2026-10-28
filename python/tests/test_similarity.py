@@ -1,4 +1,5 @@
 import io
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -45,3 +46,28 @@ def test_pools():
     sim = spatial_similarity(SAMPLES, normalize=False, pools=pools)
     assert list(sim.index) == ["p1", "p2", "p3"]
     assert_sim(sim, 0, 1 - np.sqrt(6) / np.sqrt(38), 1 - 4 / np.sqrt(38))
+
+
+def test_pig_esophagus_paper():
+    # Durkin et al. (2026)
+    spots = pd.read_csv(Path(__file__).parent / "pig_esophagus_spots.csv.xz")
+    samples = {name: s for name, s in spots.groupby("sample_name")}
+    pools = {
+        "Pre-implant": ["Pre-implant"],
+        "1 month": ["1 month (D)"],
+        "3 months": ["3 months (E)", "3 months (F)"],
+        "6 months": ["6 months (B)", "6 months (C)"],
+        "Native": ["Native DP1", "Native DP2", "Native DP3", "Native (C)"],
+    }
+    sim = spatial_similarity(samples, pools=pools)
+    paper = np.array([
+        [1.00, 0.01, 0.03, 0.09, 0.00],
+        [0.01, 1.00, 0.90, 0.68, 0.27],
+        [0.03, 0.90, 1.00, 0.70, 0.28],
+        [0.09, 0.68, 0.70, 1.00, 0.52],
+        [0.00, 0.27, 0.28, 0.52, 1.00],
+    ])
+    # The paper's 7.5 px neighbor cutoff missed a few neighbors in Native DP2
+    paper[0, 1] = paper[1, 0] = 0.02
+    assert list(sim.index) == list(pools)
+    np.testing.assert_allclose(sim.round(2).to_numpy(), paper, atol=1e-12)
