@@ -27,22 +27,12 @@ def spatial_similarity(samples, normalize=True, pools=None, only_transitions=Fal
             "'NA' and used in the comparison, rather than being treated as "
             "the absence of a label and dropped."
         )
-    samples = {
-        name: s.assign(label=s["label"].astype(str).where(s["label"].notna(), "NA"))
-        for name, s in samples.items()
-    }
+    samples = {name: s.assign(label=s["label"].astype(str).where(s["label"].notna(), "NA")) for name, s in samples.items()}
     # Sorted as set order varies between runs, changing floating-point results
     labels = sorted(set().union(*(s["label"].astype(str) for s in samples.values())))
-    counts = pd.DataFrame(
-        {
-            name: _connection_counts(s, labels, only_transitions)
-            for name, s in samples.items()
-        }
-    ).T
+    counts = pd.DataFrame({name: _connection_counts(s, labels, only_transitions) for name, s in samples.items()}).T
     if pools is not None:
-        counts = pd.DataFrame(
-            {name: counts.loc[members].sum() for name, members in pools.items()}
-        ).T
+        counts = pd.DataFrame({name: counts.loc[members].sum() for name, members in pools.items()}).T
     if normalize:
         totals = counts.sum(axis=1)
         if (totals == 0).any():
