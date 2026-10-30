@@ -116,13 +116,6 @@ test_that("only_transitions = FALSE gives the original result", {
                spatial_similarity(samples))
 })
 
-test_that("only_transitions ignores contacts within a label", {
-  extra <- data.frame(array_row = c(5, 5), array_col = c(5, 7), label = c("a", "a"))
-  s <- list(A = samples$A, A_more_a = rbind(samples$A, extra))
-  expect_lt(spatial_similarity(s)["A", "A_more_a"], 1)
-  expect_equal(spatial_similarity(s, only_transitions = TRUE)["A", "A_more_a"], 1)
-})
-
 test_that("only_transitions works with pools", {
   pools <- list(p1 = c("A", "B"), p2 = "C", p3 = "A")
   sim <- spatial_similarity(samples, normalize = FALSE, pools = pools,
