@@ -110,3 +110,37 @@ def test_pig_esophagus_paper():
     paper[0, 1] = paper[1, 0] = 0.02
     assert list(sim.index) == list(pools)
     np.testing.assert_allclose(sim.round(2).to_numpy(), paper, atol=1e-12)
+
+
+def test_only_transitions():
+    """Drops same-label contacts, so only borders between labels are compared."""
+    sim = spatial_similarity(SAMPLES, normalize=False, only_transitions=True)
+    assert_sim(sim, 0.5, 0, 0.5)
+
+
+def test_only_transitions_single_label():
+    """A sample with only one label has no transitions, NaN with a warning when normalizing."""
+    with pytest.warns(UserWarning, match="no neighboring spots: C"):
+        sim = spatial_similarity(SAMPLES, only_transitions=True)
+    assert sim.loc["A", "B"] == 1
+    assert sim["C"].isna().all() and sim.loc["C"].isna().all()
+
+
+def test_only_transitions_default_unchanged():
+    """only_transitions=False gives the original result."""
+    pd.testing.assert_frame_equal(spatial_similarity(SAMPLES, only_transitions=False), spatial_similarity(SAMPLES))
+
+
+def test_only_transitions_ignores_same_label_contacts():
+    """Adding contacts within a label changes the usual similarity but not the transitions one."""
+    extra = pd.DataFrame({"array_row": [5, 5], "array_col": [5, 7], "label": ["a", "a"]})
+    samples = {"A": SAMPLES["A"], "A_more_a": pd.concat([SAMPLES["A"], extra])}
+    assert spatial_similarity(samples).loc["A", "A_more_a"] < 1
+    assert spatial_similarity(samples, only_transitions=True).loc["A", "A_more_a"] == 1
+
+
+def test_only_transitions_with_pools():
+    """Pools sum the border counts of their samples."""
+    pools = {"p1": ["A", "B"], "p2": ["C"], "p3": ["A"]}
+    sim = spatial_similarity(SAMPLES, normalize=False, pools=pools, only_transitions=True)
+    assert_sim(sim, 0, 2 / 3, 1 / 3)
