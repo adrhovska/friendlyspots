@@ -5,7 +5,7 @@
 #' @param normalize Divide each sample's connection counts by their total.
 #' @param pools Optional named list mapping pool names to sample names;
 #'   connection counts are summed within each pool.
-#' @param transitions If `TRUE`, only count contacts between different
+#' @param only_transitions If `TRUE`, only count contacts between different
 #'   labels/cell-types (borders), dropping same-label/cell-type contacts.
 #' @return Symmetric similarity matrix with values in \[0, 1\], or `NA` for
 #'   samples with no neighboring spots when `normalize = TRUE`.
@@ -29,7 +29,7 @@
 #' @importFrom stats dist
 #' @export
 spatial_similarity <- function(samples, normalize = TRUE, pools = NULL,
-                               transitions = FALSE) {
+                               only_transitions = FALSE) {
   if (anyNA(unlist(lapply(samples, function(s) as.character(s$label))))) {
     # e.g. read.csv() reads a label literally called "NA" as missing
     warning(
@@ -46,7 +46,7 @@ spatial_similarity <- function(samples, normalize = TRUE, pools = NULL,
   labels <- sort(unique(unlist(lapply(samples, function(s) s$label))))
   counts <- do.call(rbind, lapply(samples, connection_counts,
     labels = labels,
-    transitions = transitions
+    only_transitions = only_transitions
   ))
   if (!is.null(pools)) {
     counts <- do.call(rbind, lapply(pools, function(p) {
@@ -75,7 +75,7 @@ spatial_similarity <- function(samples, normalize = TRUE, pools = NULL,
 # Hexagonal Visium neighbors in array coordinates.
 hex_offsets <- list(c(0, -2), c(0, 2), c(-1, -1), c(-1, 1), c(1, -1), c(1, 1))
 
-connection_counts <- function(sample, labels, transitions = FALSE) {
+connection_counts <- function(sample, labels, only_transitions = FALSE) {
   label <- factor(sample$label, levels = labels)
   key <- paste(sample$array_row, sample$array_col)
   counts <- matrix(0, length(labels), length(labels))
@@ -84,6 +84,6 @@ connection_counts <- function(sample, labels, transitions = FALSE) {
     hit <- !is.na(nbr)
     counts <- counts + unclass(table(label[hit], label[nbr[hit]]))
   }
-  if (transitions) diag(counts) <- 0
+  if (only_transitions) diag(counts) <- 0
   as.vector(t(counts))
 }

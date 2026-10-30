@@ -7,7 +7,7 @@ import pandas as pd
 HEX_OFFSETS = [(0, -2), (0, 2), (-1, -1), (-1, 1), (1, -1), (1, 1)]
 
 
-def spatial_similarity(samples, normalize=True, pools=None, transitions=False):
+def spatial_similarity(samples, normalize=True, pools=None, only_transitions=False):
     """Spatial similarity between spatial transcriptomics samples.
 
     samples: dict of DataFrames with columns array_row, array_col (hexagonal
@@ -15,7 +15,7 @@ def spatial_similarity(samples, normalize=True, pools=None, transitions=False):
     normalize: divide each sample's connection counts by their total.
     pools: optional dict mapping pool names to lists of sample names;
         connection counts are summed within each pool.
-    transitions: if True, only count contacts between different labels/cell-types (borders),
+    only_transitions: if True, only count contacts between different labels/cell-types (borders),
         dropping same-label/cell-type contacts.
     Returns a symmetric DataFrame of similarities in [0, 1], or NaN for
     samples with no neighboring spots when normalize=True.
@@ -35,7 +35,7 @@ def spatial_similarity(samples, normalize=True, pools=None, transitions=False):
     labels = sorted(set().union(*(s["label"].astype(str) for s in samples.values())))
     counts = pd.DataFrame(
         {
-            name: _connection_counts(s, labels, transitions)
+            name: _connection_counts(s, labels, only_transitions)
             for name, s in samples.items()
         }
     ).T
@@ -60,7 +60,7 @@ def spatial_similarity(samples, normalize=True, pools=None, transitions=False):
     return pd.DataFrame(1 - d, index=counts.index, columns=counts.index)
 
 
-def _connection_counts(sample, labels, transitions=False):
+def _connection_counts(sample, labels, only_transitions=False):
     codes = pd.Categorical(sample["label"].astype(str), categories=labels).codes
     coords = list(zip(sample["array_row"], sample["array_col"]))
     index = {rc: i for i, rc in enumerate(coords)}
@@ -70,6 +70,6 @@ def _connection_counts(sample, labels, transitions=False):
             j = index.get((r + dr, c + dc))
             if j is not None:
                 counts[codes[i], codes[j]] += 1
-    if transitions:
+    if only_transitions:
         np.fill_diagonal(counts, 0)
     return counts.ravel()
