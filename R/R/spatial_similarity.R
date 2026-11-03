@@ -11,18 +11,12 @@
 #'   samples with no neighboring spots when `normalize = TRUE`.
 #' @examples
 #' samples <- list(
-#'   a = data.frame(
-#'     array_row = c(0, 0, 1), array_col = c(0, 2, 1),
-#'     label = c("x", "y", "x")
-#'   ),
-#'   b = data.frame(
-#'     array_row = c(0, 0, 0), array_col = c(0, 2, 4),
-#'     label = c("x", "x", "y")
-#'   ),
-#'   c = data.frame(
-#'     array_row = c(0, 0), array_col = c(0, 2),
-#'     label = c("y", "y")
-#'   )
+#'   a = data.frame(array_row = c(0, 0, 1), array_col = c(0, 2, 1),
+#'                  label = c("x", "y", "x")),
+#'   b = data.frame(array_row = c(0, 0, 0), array_col = c(0, 2, 4),
+#'                  label = c("x", "x", "y")),
+#'   c = data.frame(array_row = c(0, 0), array_col = c(0, 2),
+#'                  label = c("y", "y"))
 #' )
 #' spatial_similarity(samples)
 #' spatial_similarity(samples, pools = list(ab = c("a", "b"), c = "c"))
@@ -32,11 +26,9 @@ spatial_similarity <- function(samples, normalize = TRUE, pools = NULL,
                                only_transitions = FALSE) {
   if (anyNA(unlist(lapply(samples, function(s) as.character(s$label))))) {
     # e.g. read.csv() reads a label literally called "NA" as missing
-    warning(
-      "Some labels are 'NA'. These will be treated as a label called ",
-      "'NA' and used in the comparison, rather than being treated as ",
-      "the absence of a label and dropped."
-    )
+    warning("Some labels are 'NA'. These will be treated as a label called ",
+            "'NA' and used in the comparison, rather than being treated as ",
+            "the absence of a label and dropped.")
   }
   samples <- lapply(samples, function(s) {
     s$label <- ifelse(is.na(s$label), "NA", as.character(s$label))
@@ -44,10 +36,8 @@ spatial_similarity <- function(samples, normalize = TRUE, pools = NULL,
   })
   # Sorted so floating-point results don't depend on sample order
   labels <- sort(unique(unlist(lapply(samples, function(s) s$label))))
-  counts <- do.call(rbind, lapply(samples, connection_counts,
-    labels = labels,
-    only_transitions = only_transitions
-  ))
+  counts <- do.call(rbind, lapply(samples, connection_counts, labels = labels,
+                                  only_transitions = only_transitions))
   if (!is.null(pools)) {
     counts <- do.call(rbind, lapply(pools, function(p) {
       colSums(counts[p, , drop = FALSE])
