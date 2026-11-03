@@ -120,14 +120,14 @@ def test_only_transitions():
 
 def test_only_transitions_single_label():
     """A sample with only one label has no transitions, NaN with a warning when normalizing."""
-    with pytest.warns(UserWarning, match="no neighboring spots: C"):
+    with pytest.warns(UserWarning, match=r"with different labels \(no transitions\): C"):
         sim = spatial_similarity(SAMPLES, only_transitions=True)
     assert sim.loc["A", "B"] == 1
     assert sim["C"].isna().all() and sim.loc["C"].isna().all()
 
 
 def test_only_transitions_default_unchanged():
-    """only_transitions=False gives the original result."""
+    """only_transitions=False gives the default result."""
     pd.testing.assert_frame_equal(spatial_similarity(SAMPLES, only_transitions=False), spatial_similarity(SAMPLES))
 
 

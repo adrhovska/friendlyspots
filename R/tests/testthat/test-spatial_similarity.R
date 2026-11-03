@@ -111,7 +111,7 @@ test_that("one-label samples have no transitions, giving NA and a warning", {
   expect_true(all(is.na(sim["C", ])) && all(is.na(sim[, "C"])))
 })
 
-test_that("only_transitions = FALSE gives the original result", {
+test_that("only_transitions = FALSE gives the default result", {
   expect_equal(spatial_similarity(samples, only_transitions = FALSE),
                spatial_similarity(samples))
 })
