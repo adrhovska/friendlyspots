@@ -104,9 +104,9 @@ test_that("only_transitions drops same-label contacts", {
   expect_sim(sim, 0.5, 0, 0.5)
 })
 
-test_that("a sample with only one label has no transitions, NA with a warning", {
+test_that("one-label samples have no transitions, giving NA and a warning", {
   expect_warning(sim <- spatial_similarity(samples, only_transitions = TRUE),
-                 "no neighboring spots: C")
+                 "with different labels \\(no transitions\\): C")
   expect_equal(sim["A", "B"], 1)
   expect_true(all(is.na(sim["C", ])) && all(is.na(sim[, "C"])))
 })

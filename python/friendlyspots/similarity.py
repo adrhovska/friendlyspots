@@ -37,7 +37,9 @@ def spatial_similarity(samples, normalize=True, pools=None, only_transitions=Fal
         totals = counts.sum(axis=1)
         if (totals == 0).any():
             warnings.warn(
-                "Similarities are NA for samples with no neighboring spots: "
+                "Similarities are NA for samples with no neighboring spots"
+                + (" with different labels (no transitions)" if only_transitions else "")
+                + ": "
                 + ", ".join(map(str, counts.index[totals == 0]))
             )
         counts = counts.div(totals, axis=0)

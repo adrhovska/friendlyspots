@@ -46,10 +46,9 @@ spatial_similarity <- function(samples, normalize = TRUE, pools = NULL,
   if (normalize) {
     empty <- rowSums(counts) == 0
     if (any(empty)) {
-      warning(
-        "Similarities are NA for samples with no neighboring spots: ",
-        paste(rownames(counts)[empty], collapse = ", ")
-      )
+      warning("Similarities are NA for samples with no neighboring spots",
+              if (only_transitions) " with different labels (no transitions)",
+              ": ", paste(rownames(counts)[empty], collapse = ", "))
     }
     counts <- counts / rowSums(counts)
   }
