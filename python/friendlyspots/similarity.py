@@ -15,8 +15,9 @@ def spatial_similarity(samples, normalize=True, pools=None, only_transitions=Fal
     normalize: divide each sample's connection counts by their total.
     pools: optional dict mapping pool names to lists of sample names;
         connection counts are summed within each pool.
-    only_transitions: if True, only count contacts between different labels/cell-types (borders),
-        dropping same-label/cell-type contacts.
+    only_transitions: if True, only count connections between spots with
+        distinct labels (i.e. borders); does not count connections between
+        spots with the same label.
     Returns a symmetric DataFrame of similarities in [0, 1], or NaN for
     samples with no neighboring spots when normalize=True.
     """

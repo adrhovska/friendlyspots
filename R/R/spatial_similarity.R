@@ -5,8 +5,9 @@
 #' @param normalize Divide each sample's connection counts by their total.
 #' @param pools Optional named list mapping pool names to sample names;
 #'   connection counts are summed within each pool.
-#' @param only_transitions If `TRUE`, only count contacts between different
-#'   labels/cell-types (borders), dropping same-label/cell-type contacts.
+#' @param only_transitions If `TRUE`, only count connections between spots with
+#'   distinct labels (i.e. borders); does not count connections between spots
+#'   with the same label.
 #' @return Symmetric similarity matrix with values in \[0, 1\], or `NA` for
 #'   samples with no neighboring spots when `normalize = TRUE`.
 #' @examples
