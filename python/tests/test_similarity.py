@@ -113,13 +113,13 @@ def test_pig_esophagus_paper():
 
 
 def test_only_transitions():
-    """Drops same-label contacts, so only borders between labels are compared."""
+    """only_transitions drops same-label contacts, so only borders count."""
     sim = spatial_similarity(SAMPLES, normalize=False, only_transitions=True)
     assert_sim(sim, 0.5, 0, 0.5)
 
 
 def test_only_transitions_single_label():
-    """A sample with only one label has no transitions, NaN with a warning when normalizing."""
+    """One-label samples have no transitions, giving NA and a warning."""
     with pytest.warns(UserWarning, match=r"with different labels \(no transitions\): C"):
         sim = spatial_similarity(SAMPLES, only_transitions=True)
     assert sim.loc["A", "B"] == 1

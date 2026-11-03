@@ -99,7 +99,7 @@ test_that("reproduces the pig esophagus paper's similarities", {
   expect_equal(round(sim, 2), paper)
 })
 
-test_that("only_transitions drops same-label contacts", {
+test_that("only_transitions drops same-label contacts, so only borders count", {
   sim <- spatial_similarity(samples, normalize = FALSE, only_transitions = TRUE)
   expect_sim(sim, 0.5, 0, 0.5)
 })
@@ -116,7 +116,7 @@ test_that("only_transitions = FALSE gives the default result", {
                spatial_similarity(samples))
 })
 
-test_that("only_transitions works with pools", {
+test_that("pools sum the border counts of their samples", {
   pools <- list(p1 = c("A", "B"), p2 = "C", p3 = "A")
   sim <- spatial_similarity(samples, normalize = FALSE, pools = pools,
                             only_transitions = TRUE)
