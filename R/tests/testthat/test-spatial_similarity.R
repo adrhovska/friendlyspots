@@ -98,3 +98,27 @@ test_that("reproduces the pig esophagus paper's similarities", {
   paper[1, 2] <- paper[2, 1] <- 0.02
   expect_equal(round(sim, 2), paper)
 })
+
+test_that("only_transitions drops same-label contacts, so only borders count", {
+  sim <- spatial_similarity(samples, normalize = FALSE, only_transitions = TRUE)
+  expect_sim(sim, 0.5, 0, 0.5)
+})
+
+test_that("one-label samples have no transitions, giving NA and a warning", {
+  expect_warning(sim <- spatial_similarity(samples, only_transitions = TRUE),
+                 "with different labels \\(no transitions\\): C")
+  expect_equal(sim["A", "B"], 1)
+  expect_true(all(is.na(sim["C", ])) && all(is.na(sim[, "C"])))
+})
+
+test_that("only_transitions = FALSE gives the default result", {
+  expect_equal(spatial_similarity(samples, only_transitions = FALSE),
+               spatial_similarity(samples))
+})
+
+test_that("pools sum the border counts of their samples", {
+  pools <- list(p1 = c("A", "B"), p2 = "C", p3 = "A")
+  sim <- spatial_similarity(samples, normalize = FALSE, pools = pools,
+                            only_transitions = TRUE)
+  expect_sim(sim, 0, 2 / 3, 1 / 3)
+})

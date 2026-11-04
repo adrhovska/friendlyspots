@@ -110,3 +110,29 @@ def test_pig_esophagus_paper():
     paper[0, 1] = paper[1, 0] = 0.02
     assert list(sim.index) == list(pools)
     np.testing.assert_allclose(sim.round(2).to_numpy(), paper, atol=1e-12)
+
+
+def test_only_transitions():
+    """only_transitions drops same-label contacts, so only borders count."""
+    sim = spatial_similarity(SAMPLES, normalize=False, only_transitions=True)
+    assert_sim(sim, 0.5, 0, 0.5)
+
+
+def test_only_transitions_single_label():
+    """One-label samples have no transitions, giving NA and a warning."""
+    with pytest.warns(UserWarning, match=r"with different labels \(no transitions\): C"):
+        sim = spatial_similarity(SAMPLES, only_transitions=True)
+    assert sim.loc["A", "B"] == 1
+    assert sim["C"].isna().all() and sim.loc["C"].isna().all()
+
+
+def test_only_transitions_default_unchanged():
+    """only_transitions=False gives the default result."""
+    pd.testing.assert_frame_equal(spatial_similarity(SAMPLES, only_transitions=False), spatial_similarity(SAMPLES))
+
+
+def test_only_transitions_with_pools():
+    """Pools sum the border counts of their samples."""
+    pools = {"p1": ["A", "B"], "p2": ["C"], "p3": ["A"]}
+    sim = spatial_similarity(SAMPLES, normalize=False, pools=pools, only_transitions=True)
+    assert_sim(sim, 0, 2 / 3, 1 / 3)

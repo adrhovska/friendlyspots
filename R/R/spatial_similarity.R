@@ -5,6 +5,9 @@
 #' @param normalize Divide each sample's connection counts by their total.
 #' @param pools Optional named list mapping pool names to sample names;
 #'   connection counts are summed within each pool.
+#' @param only_transitions If `TRUE`, only count connections between spots with
+#'   distinct labels (i.e. borders); does not count connections between spots
+#'   with the same label.
 #' @return Symmetric similarity matrix with values in \[0, 1\], or `NA` for
 #'   samples with no neighboring spots when `normalize = TRUE`.
 #' @examples
@@ -20,7 +23,8 @@
 #' spatial_similarity(samples, pools = list(ab = c("a", "b"), c = "c"))
 #' @importFrom stats dist
 #' @export
-spatial_similarity <- function(samples, normalize = TRUE, pools = NULL) {
+spatial_similarity <- function(samples, normalize = TRUE, pools = NULL,
+                               only_transitions = FALSE) {
   if (anyNA(unlist(lapply(samples, function(s) as.character(s$label))))) {
     # e.g. read.csv() reads a label literally called "NA" as missing
     warning("Some labels are 'NA'. These will be treated as a label called ",
@@ -33,7 +37,8 @@ spatial_similarity <- function(samples, normalize = TRUE, pools = NULL) {
   })
   # Sorted so floating-point results don't depend on sample order
   labels <- sort(unique(unlist(lapply(samples, function(s) s$label))))
-  counts <- do.call(rbind, lapply(samples, connection_counts, labels = labels))
+  counts <- do.call(rbind, lapply(samples, connection_counts, labels = labels,
+                                  only_transitions = only_transitions))
   if (!is.null(pools)) {
     counts <- do.call(rbind, lapply(pools, function(p) {
       colSums(counts[p, , drop = FALSE])
@@ -42,8 +47,9 @@ spatial_similarity <- function(samples, normalize = TRUE, pools = NULL) {
   if (normalize) {
     empty <- rowSums(counts) == 0
     if (any(empty)) {
-      warning("Similarities are NA for samples with no neighboring spots: ",
-              paste(rownames(counts)[empty], collapse = ", "))
+      warning("Similarities are NA for samples with no neighboring spots",
+              if (only_transitions) " with different labels (no transitions)",
+              ": ", paste(rownames(counts)[empty], collapse = ", "))
     }
     counts <- counts / rowSums(counts)
   }
@@ -59,7 +65,7 @@ spatial_similarity <- function(samples, normalize = TRUE, pools = NULL) {
 # Hexagonal Visium neighbors in array coordinates.
 hex_offsets <- list(c(0, -2), c(0, 2), c(-1, -1), c(-1, 1), c(1, -1), c(1, 1))
 
-connection_counts <- function(sample, labels) {
+connection_counts <- function(sample, labels, only_transitions = FALSE) {
   label <- factor(sample$label, levels = labels)
   key <- paste(sample$array_row, sample$array_col)
   counts <- matrix(0, length(labels), length(labels))
@@ -68,5 +74,6 @@ connection_counts <- function(sample, labels) {
     hit <- !is.na(nbr)
     counts <- counts + unclass(table(label[hit], label[nbr[hit]]))
   }
+  if (only_transitions) diag(counts) <- 0
   as.vector(t(counts))
 }
