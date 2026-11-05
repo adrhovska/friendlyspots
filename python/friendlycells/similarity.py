@@ -69,6 +69,7 @@ def spatial_similarity(
     if neighborhood == "auto" or (radius is None and neighborhood != "knn"):
         nn = _nn_distances(samples)
     if neighborhood == "auto":
+        # pylint: disable-next=possibly-used-before-assignment
         neighborhood = "radius" if _on_grid(nn) else "delaunay"
         lie = "lie" if neighborhood == "radius" else "don't lie"
         print(
