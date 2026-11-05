@@ -41,12 +41,18 @@
 #'   samples with no neighboring spots when `normalize = TRUE`.
 #' @examples
 #' samples <- list(
-#'   a = data.frame(x = c(0, 100, 50), y = c(0, 0, 86.6),
-#'                  label = c("x", "y", "x")),
-#'   b = data.frame(x = c(0, 100, 200), y = c(0, 0, 0),
-#'                  label = c("x", "x", "y")),
-#'   c = data.frame(x = c(0, 100), y = c(0, 0),
-#'                  label = c("y", "y"))
+#'   a = data.frame(
+#'     x = c(0, 100, 50), y = c(0, 0, 86.6),
+#'     label = c("x", "y", "x")
+#'   ),
+#'   b = data.frame(
+#'     x = c(0, 100, 200), y = c(0, 0, 0),
+#'     label = c("x", "x", "y")
+#'   ),
+#'   c = data.frame(
+#'     x = c(0, 100), y = c(0, 0),
+#'     label = c("y", "y")
+#'   )
 #' )
 #' spatial_similarity(samples)
 #' spatial_similarity(samples, pools = list(ab = c("a", "b"), c = "c"))
@@ -55,31 +61,41 @@
 #' @export
 spatial_similarity <- function(samples, normalize = TRUE, pools = NULL,
                                only_transitions = FALSE,
-                               neighborhood = c("auto", "radius", "knn",
-                                                "delaunay"),
+                               neighborhood = c(
+                                 "auto", "radius", "knn",
+                                 "delaunay"
+                               ),
                                radius = NULL, k = 6) {
   neighborhood <- match.arg(neighborhood)
-  if (!all(vapply(samples, function(s) all(c("x", "y", "label") %in% names(s)),
-                  logical(1)))) {
-    stop("Each sample needs columns x, y (positions, e.g. in micrometres) ",
-         "and label.")
+  if (!all(vapply(
+    samples, function(s) all(c("x", "y", "label") %in% names(s)),
+    logical(1)
+  ))) {
+    stop(
+      "Each sample needs columns x, y (positions, e.g. in micrometres) ",
+      "and label."
+    )
   }
   if (neighborhood == "auto" || (is.null(radius) && neighborhood != "knn")) {
     nn <- nn_distances(samples)
   }
   if (neighborhood == "auto") {
     neighborhood <- if (on_grid(nn)) "radius" else "delaunay"
-    message("Using neighborhood = \"", neighborhood, "\", as the positions ",
-            if (neighborhood == "radius") "lie" else "don't lie", " on a grid.")
+    message(
+      "Using neighborhood = \"", neighborhood, "\", as the positions ",
+      if (neighborhood == "radius") "lie" else "don't lie", " on a grid."
+    )
   }
   if (is.null(radius) && neighborhood != "knn") {
     radius <- default_radius(nn, neighborhood)
   }
   if (anyNA(unlist(lapply(samples, function(s) as.character(s$label))))) {
     # e.g. read.csv() reads a label literally called "NA" as missing
-    warning("Some labels are 'NA'. These will be treated as a label called ",
-            "'NA' and used in the comparison, rather than being treated as ",
-            "the absence of a label and dropped.")
+    warning(
+      "Some labels are 'NA'. These will be treated as a label called ",
+      "'NA' and used in the comparison, rather than being treated as ",
+      "the absence of a label and dropped."
+    )
   }
   samples <- lapply(samples, function(s) {
     s$label <- ifelse(is.na(s$label), "NA", as.character(s$label))
@@ -87,10 +103,12 @@ spatial_similarity <- function(samples, normalize = TRUE, pools = NULL,
   })
   # Sorted so floating-point results don't depend on sample order
   labels <- sort(unique(unlist(lapply(samples, function(s) s$label))))
-  counts <- do.call(rbind, lapply(samples, connection_counts, labels = labels,
-                                  only_transitions = only_transitions,
-                                  neighborhood = neighborhood, radius = radius,
-                                  k = k))
+  counts <- do.call(rbind, lapply(samples, connection_counts,
+    labels = labels,
+    only_transitions = only_transitions,
+    neighborhood = neighborhood, radius = radius,
+    k = k
+  ))
   if (!is.null(pools)) {
     counts <- do.call(rbind, lapply(pools, function(p) {
       colSums(counts[p, , drop = FALSE])
@@ -99,9 +117,11 @@ spatial_similarity <- function(samples, normalize = TRUE, pools = NULL,
   if (normalize) {
     empty <- rowSums(counts) == 0
     if (any(empty)) {
-      warning("Similarities are NA for samples with no neighboring spots",
-              if (only_transitions) " with different labels (no transitions)",
-              ": ", paste(rownames(counts)[empty], collapse = ", "))
+      warning(
+        "Similarities are NA for samples with no neighboring spots",
+        if (only_transitions) " with different labels (no transitions)",
+        ": ", paste(rownames(counts)[empty], collapse = ", ")
+      )
     }
     counts <- counts / rowSums(counts)
   }
@@ -117,7 +137,9 @@ spatial_similarity <- function(samples, normalize = TRUE, pools = NULL,
 # Distance from each spot or cell to its nearest neighbor, over all samples
 nn_distances <- function(samples) {
   unlist(lapply(samples, function(s) {
-    if (nrow(s) < 2) return(numeric(0))
+    if (nrow(s) < 2) {
+      return(numeric(0))
+    }
     dbscan::kNN(cbind(s$x, s$y), k = 1)$dist
   }))
 }
@@ -147,7 +169,9 @@ connection_counts <- function(sample, labels, only_transitions = FALSE,
 # Pairs (i, j) of neighboring rows of xy, each pair listed in both directions
 neighbor_pairs <- function(xy, neighborhood, radius = NULL, k = 6) {
   n <- nrow(xy)
-  if (n < 2) return(matrix(integer(0), 0, 2))
+  if (n < 2) {
+    return(matrix(integer(0), 0, 2))
+  }
   if (neighborhood == "radius") {
     nbr <- dbscan::frNN(xy, eps = radius)$id
     pairs <- cbind(rep(seq_len(n), lengths(nbr)), unlist(nbr))
@@ -161,13 +185,14 @@ neighbor_pairs <- function(xy, neighborhood, radius = NULL, k = 6) {
     pairs <- as.matrix(tri$delsgs[, c("ind1", "ind2")])
     if (!is.null(radius)) {
       len <- sqrt(rowSums((xy[pairs[, 1], , drop = FALSE] -
-                             xy[pairs[, 2], , drop = FALSE])^2))
+        xy[pairs[, 2], , drop = FALSE])^2))
       pairs <- pairs[len <= radius, , drop = FALSE]
     }
   }
   # kNN links can be one-way, so add the reverse of every pair, then dedupe
   pairs <- rbind(pairs, pairs[, 2:1])
   pairs <- unname(pairs[!duplicated((pairs[, 1] - 1) * n + pairs[, 2]), ,
-                        drop = FALSE])
+    drop = FALSE
+  ])
   pairs[order(pairs[, 1], pairs[, 2]), , drop = FALSE]
 }

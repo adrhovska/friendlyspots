@@ -11,7 +11,8 @@ samples <- list(
 expect_sim <- function(sim, ab, ac, bc) {
   n <- rownames(sim)
   expected <- matrix(c(1, ab, ac, ab, 1, bc, ac, bc, 1), 3,
-                     dimnames = list(n, n))
+    dimnames = list(n, n)
+  )
   expect_equal(sim, expected)
 }
 
@@ -69,9 +70,12 @@ test_that("samples where no spot has any neighbor yield NA and a warning", {
   sim <- spatial_similarity(samples)
   # D's two spots don't touch, so it has no connections to normalize
   d <- visium(0, c(0, 4), "a")
-  expect_warning(with_d <- spatial_similarity(c(samples, list(D = d)),
-                                              neighborhood = "radius"),
-                 "no neighboring spots: D")
+  expect_warning(
+    with_d <- spatial_similarity(c(samples, list(D = d)),
+      neighborhood = "radius"
+    ),
+    "no neighboring spots: D"
+  )
   expect_equal(with_d[1:3, 1:3], sim)
   expect_true(all(is.na(with_d["D", ])) && all(is.na(with_d[, "D"])))
 })
@@ -87,7 +91,8 @@ test_that("reproduces the pig esophagus paper's similarities", {
   # Durkin et al. (2026)
   spots <- read.csv(test_path("pig_esophagus_spots.csv.xz"))
   spots <- cbind(visium(spots$array_row, spots$array_col, spots$label),
-                 sample_name = spots$sample_name)
+    sample_name = spots$sample_name
+  )
   pools <- list(
     "Pre-implant" = "Pre-implant",
     "1 month" = "1 month (D)",
@@ -96,12 +101,17 @@ test_that("reproduces the pig esophagus paper's similarities", {
     "Native" = c("Native DP1", "Native DP2", "Native DP3", "Native (C)")
   )
   sim <- spatial_similarity(split(spots, spots$sample_name), pools = pools)
-  paper <- matrix(c(1.00, 0.01, 0.03, 0.09, 0.00,
-                    0.01, 1.00, 0.90, 0.68, 0.27,
-                    0.03, 0.90, 1.00, 0.70, 0.28,
-                    0.09, 0.68, 0.70, 1.00, 0.52,
-                    0.00, 0.27, 0.28, 0.52, 1.00),
-                  5, dimnames = list(names(pools), names(pools)))
+  paper <- matrix(
+    c(
+      1.00, 0.01, 0.03, 0.09, 0.00,
+      0.01, 1.00, 0.90, 0.68, 0.27,
+      0.03, 0.90, 1.00, 0.70, 0.28,
+      0.09, 0.68, 0.70, 1.00, 0.52,
+      0.00, 0.27, 0.28, 0.52, 1.00
+    ),
+    5,
+    dimnames = list(names(pools), names(pools))
+  )
   # The paper's 7.5 px neighbor cutoff missed a few neighbors in Native DP2
   paper[1, 2] <- paper[2, 1] <- 0.02
   expect_equal(round(sim, 2), paper)
@@ -113,48 +123,62 @@ test_that("only_transitions drops same-label contacts, so only borders count", {
 })
 
 test_that("one-label samples have no transitions, giving NA and a warning", {
-  expect_warning(sim <- spatial_similarity(samples, only_transitions = TRUE),
-                 "with different labels \\(no transitions\\): C")
+  expect_warning(
+    sim <- spatial_similarity(samples, only_transitions = TRUE),
+    "with different labels \\(no transitions\\): C"
+  )
   expect_equal(sim["A", "B"], 1)
   expect_true(all(is.na(sim["C", ])) && all(is.na(sim[, "C"])))
 })
 
 test_that("only_transitions = FALSE gives the default result", {
-  expect_equal(spatial_similarity(samples, only_transitions = FALSE),
-               spatial_similarity(samples))
+  expect_equal(
+    spatial_similarity(samples, only_transitions = FALSE),
+    spatial_similarity(samples)
+  )
 })
 
 test_that("pools sum the border counts of their samples", {
   pools <- list(p1 = c("A", "B"), p2 = "C", p3 = "A")
-  sim <- spatial_similarity(samples, normalize = FALSE, pools = pools,
-                            only_transitions = TRUE)
+  sim <- spatial_similarity(samples,
+    normalize = FALSE, pools = pools,
+    only_transitions = TRUE
+  )
   expect_sim(sim, 0, 2 / 3, 1 / 3)
 })
 
 test_that("radius links cells up to and including the radius", {
   xy <- cbind(c(0, 10, 20.5), 0)
-  expect_equal(neighbor_pairs(xy, "radius", radius = 10),
-               rbind(c(1, 2), c(2, 1)))
+  expect_equal(
+    neighbor_pairs(xy, "radius", radius = 10),
+    rbind(c(1, 2), c(2, 1))
+  )
 })
 
 test_that("knn links cells both ways if either is among the other's nearest", {
   # 3's nearest is 2, but 2's nearest is 1
   xy <- cbind(c(0, 1, 3), 0)
-  expect_equal(neighbor_pairs(xy, "knn", k = 1),
-               rbind(c(1, 2), c(2, 1), c(2, 3), c(3, 2)))
+  expect_equal(
+    neighbor_pairs(xy, "knn", k = 1),
+    rbind(c(1, 2), c(2, 1), c(2, 3), c(3, 2))
+  )
 })
 
 test_that("delaunay links surrounding cells, dropping links over radius", {
   # A triangle, and a far cell that Delaunay links to it
   xy <- cbind(c(0, 10, 5, 100), c(0, 0, 8, 0))
-  expect_equal(neighbor_pairs(xy, "delaunay", radius = 20),
-               rbind(c(1, 2), c(1, 3), c(2, 1), c(2, 3), c(3, 1), c(3, 2)))
+  expect_equal(
+    neighbor_pairs(xy, "delaunay", radius = 20),
+    rbind(c(1, 2), c(1, 3), c(2, 1), c(2, 3), c(3, 1), c(3, 2))
+  )
 })
 
 test_that("delaunay links collinear cells to the next along the line", {
   xy <- cbind(c(0, 20, 10), 0)
-  expect_equal(neighbor_pairs(xy, "delaunay"),
-               rbind(c(1, 3), c(2, 3), c(3, 1), c(3, 2)))
+  expect_equal(
+    neighbor_pairs(xy, "delaunay"),
+    rbind(c(1, 3), c(2, 3), c(3, 1), c(3, 2))
+  )
 })
 
 test_that("missing x/y columns give an informative error", {
@@ -164,8 +188,10 @@ test_that("missing x/y columns give an informative error", {
 
 test_that("default radius scales the median spacing over all samples", {
   # Nearest-neighbor distances 10, 10 and 22, 22, 28, so the spacing is 22
-  s <- list(a = data.frame(x = c(0, 10), y = 0),
-            b = data.frame(x = c(0, 22, 50), y = 0))
+  s <- list(
+    a = data.frame(x = c(0, 10), y = 0),
+    b = data.frame(x = c(0, 22, 50), y = 0)
+  )
   nn <- nn_distances(s)
   expect_equal(default_radius(nn, "radius"), 1.2 * 22)
   expect_equal(default_radius(nn, "delaunay"), 3 * 22)
@@ -173,8 +199,10 @@ test_that("default radius scales the median spacing over all samples", {
 
 test_that("auto uses radius on a grid and delaunay otherwise, saying which", {
   expect_message(spatial_similarity(samples), 'neighborhood = "radius"')
-  cells <- list(A = data.frame(x = c(0, 4, 11, 13, 30), y = c(0, 9, 2, 20, 6),
-                               label = "a"))
+  cells <- list(A = data.frame(
+    x = c(0, 4, 11, 13, 30), y = c(0, 9, 2, 20, 6),
+    label = "a"
+  ))
   expect_message(spatial_similarity(cells), 'neighborhood = "delaunay"')
 })
 
