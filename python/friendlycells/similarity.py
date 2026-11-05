@@ -6,7 +6,15 @@ import pandas as pd
 from scipy.spatial import Delaunay, cKDTree
 
 
-def spatial_similarity(samples, normalize=True, pools=None, only_transitions=False, neighborhood="auto", radius=None, k=6):
+def spatial_similarity(
+    samples,
+    normalize=True,
+    pools=None,
+    only_transitions=False,
+    neighborhood="auto",
+    radius=None,
+    k=6,
+):
     """Spatial similarity between spatial transcriptomics samples.
 
     samples: dict of DataFrames, one per sample, with columns: x, y (positions
@@ -53,13 +61,18 @@ def spatial_similarity(samples, normalize=True, pools=None, only_transitions=Fal
     if neighborhood not in ("auto", "radius", "knn", "delaunay"):
         raise ValueError("neighborhood must be 'auto', 'radius', 'knn' or 'delaunay'.")
     if not all({"x", "y", "label"} <= set(s.columns) for s in samples.values()):
-        raise ValueError("Each sample needs columns x, y (positions, e.g. in micrometres) and label.")
+        raise ValueError(
+            "Each sample needs columns x, y (positions, e.g. in micrometres) and label."
+        )
     if neighborhood == "auto" or (radius is None and neighborhood != "knn"):
         nn = _nn_distances(samples)
     if neighborhood == "auto":
         neighborhood = "radius" if _on_grid(nn) else "delaunay"
         lie = "lie" if neighborhood == "radius" else "don't lie"
-        print(f'Using neighborhood="{neighborhood}", as the positions {lie} on a grid.', file=sys.stderr)
+        print(
+            f'Using neighborhood="{neighborhood}", as the positions {lie} on a grid.',
+            file=sys.stderr,
+        )
     if radius is None and neighborhood != "knn":
         radius = _default_radius(nn, neighborhood)
     if any(s["label"].isna().any() for s in samples.values()):
@@ -69,20 +82,34 @@ def spatial_similarity(samples, normalize=True, pools=None, only_transitions=Fal
             "'NA' and used in the comparison, rather than being treated as "
             "the absence of a label and dropped."
         )
-    samples = {name: s.assign(label=s["label"].astype(str).where(s["label"].notna(), "NA")) for name, s in samples.items()}
+    samples = {
+        name: s.assign(label=s["label"].astype(str).where(s["label"].notna(), "NA"))
+        for name, s in samples.items()
+    }
     # Sorted as set order varies between runs, changing floating-point results
     labels = sorted(set().union(*(s["label"].astype(str) for s in samples.values())))
     counts = pd.DataFrame(
-        {name: _connection_counts(s, labels, only_transitions, neighborhood, radius, k) for name, s in samples.items()}
+        {
+            name: _connection_counts(
+                s, labels, only_transitions, neighborhood, radius, k
+            )
+            for name, s in samples.items()
+        }
     ).T
     if pools is not None:
-        counts = pd.DataFrame({name: counts.loc[members].sum() for name, members in pools.items()}).T
+        counts = pd.DataFrame(
+            {name: counts.loc[members].sum() for name, members in pools.items()}
+        ).T
     if normalize:
         totals = counts.sum(axis=1)
         if (totals == 0).any():
             warnings.warn(
                 "Similarities are NA for samples with no neighboring spots"
-                + (" with different labels (no transitions)" if only_transitions else "")
+                + (
+                    " with different labels (no transitions)"
+                    if only_transitions
+                    else ""
+                )
                 + ": "
                 + ", ".join(map(str, counts.index[totals == 0]))
             )
@@ -99,7 +126,10 @@ def spatial_similarity(samples, normalize=True, pools=None, only_transitions=Fal
 def _nn_distances(samples):
     """Distance from each spot or cell to its nearest neighbor, over all samples."""
     xys = [s[["x", "y"]].to_numpy(dtype=float) for s in samples.values()]
-    return np.concatenate([cKDTree(xy).query(xy, k=2)[0][:, 1] for xy in xys if len(xy) >= 2] or [[np.nan]])
+    return np.concatenate(
+        [cKDTree(xy).query(xy, k=2)[0][:, 1] for xy in xys if len(xy) >= 2]
+        or [[np.nan]]
+    )
 
 
 def _on_grid(nn):
@@ -110,13 +140,18 @@ def _on_grid(nn):
 
 def _default_radius(nn, neighborhood):
     """The median nearest-neighbor distance, times 1.2 for "radius" (Visium's six neighbors,
-    or HD bins' four, allowing for jitter) or 3 for "delaunay" (dropping only links across gaps)."""
+    or HD bins' four, allowing for jitter) or 3 for "delaunay" (dropping only links across gaps).
+    """
     return np.median(nn) * (1.2 if neighborhood == "radius" else 3)
 
 
-def _connection_counts(sample, labels, only_transitions=False, neighborhood="radius", radius=None, k=6):
+def _connection_counts(
+    sample, labels, only_transitions=False, neighborhood="radius", radius=None, k=6
+):
     codes = pd.Categorical(sample["label"].astype(str), categories=labels).codes
-    pairs = _neighbor_pairs(sample[["x", "y"]].to_numpy(dtype=float), neighborhood, radius, k)
+    pairs = _neighbor_pairs(
+        sample[["x", "y"]].to_numpy(dtype=float), neighborhood, radius, k
+    )
     counts = np.zeros((len(labels), len(labels)))
     np.add.at(counts, (codes[pairs[:, 0]], codes[pairs[:, 1]]), 1)
     if only_transitions:
@@ -134,11 +169,15 @@ def _neighbor_pairs(xy, neighborhood, radius=None, k=6):
     elif neighborhood == "knn":
         # The nearest point to each is itself
         _, nbr = cKDTree(xy).query(xy, k=min(k, n - 1) + 1)
-        pairs = np.column_stack([np.repeat(np.arange(n), nbr.shape[1] - 1), nbr[:, 1:].ravel()])
+        pairs = np.column_stack(
+            [np.repeat(np.arange(n), nbr.shape[1] - 1), nbr[:, 1:].ravel()]
+        )
     else:
         pairs = _delaunay_edges(xy)
         if radius is not None:
-            pairs = pairs[np.linalg.norm(xy[pairs[:, 0]] - xy[pairs[:, 1]], axis=1) <= radius]
+            pairs = pairs[
+                np.linalg.norm(xy[pairs[:, 0]] - xy[pairs[:, 1]], axis=1) <= radius
+            ]
     # kNN links can be one-way, so add the reverse of every pair, then dedupe
     return np.unique(np.vstack([pairs, pairs[:, ::-1]]), axis=0)
 

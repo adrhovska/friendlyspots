@@ -10,7 +10,8 @@ samples <- list(
 
 expect_sim <- function(sim, ab, ac, bc) {
   n <- rownames(sim)
-  expected <- matrix(c(1, ab, ac, ab, 1, bc, ac, bc, 1), 3, dimnames = list(n, n))
+  expected <- matrix(c(1, ab, ac, ab, 1, bc, ac, bc, 1), 3,
+                     dimnames = list(n, n))
   expect_equal(sim, expected)
 }
 
