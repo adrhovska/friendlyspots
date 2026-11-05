@@ -1,3 +1,5 @@
+"""Computes similarity between samples from counts of neighboring labels."""
+
 import sys
 import warnings
 

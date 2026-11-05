@@ -1,3 +1,5 @@
+"""Tests for spatial_similarity and its helpers."""
+
 import io
 from pathlib import Path
 
@@ -25,6 +27,7 @@ SAMPLES = {
 
 
 def assert_sim(sim, ab, ac, bc):
+    """Check sim is the 3x3 similarity matrix with off-diagonals ab, ac, bc."""
     expected = np.array([[1, ab, ac], [ab, 1, bc], [ac, bc, 1]])
     np.testing.assert_allclose(sim.to_numpy(), expected)
     assert list(sim.columns) == list(sim.index)
