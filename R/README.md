@@ -3,7 +3,7 @@
 
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/george-hall-ucl/friendlyspots/main/assets/logo.gif" width="210" alt="friendlyspots logo">
+  <img src="https://raw.githubusercontent.com/george-hall-ucl/friendlycells/main/assets/logo.gif" width="210" alt="friendlycells logo">
 </p>
 
 Compute similarity between spatial transcriptomics samples based on which
@@ -12,18 +12,18 @@ labels (e.g. cell types) border one another.
 ## Installation
 
 ```r
-remotes::install_github("george-hall-ucl/friendlyspots", subdir = "R")
+remotes::install_github("george-hall-ucl/friendlycells", subdir = "R")
 ```
 
 Requires `dbscan` and `deldir`. Also available as a
-[Python package](https://github.com/george-hall-ucl/friendlyspots/tree/main/python).
+[Python package](https://github.com/george-hall-ucl/friendlycells/tree/main/python).
 
 ## Usage
 
 Compatible with Visium, Visium HD (binned or segmented) and Xenium.
 
 ```r
-library(friendlyspots)
+library(friendlycells)
 
 # One data frame per sample, with columns x, y (positions, e.g. in pixels or
 # micrometres) and label (see Extracting positions below)
@@ -60,7 +60,7 @@ For a Seurat object `obj` from `Load10X_Spatial()` (Visium; or Visium HD,
 with e.g. `bin.size = 8` for bins or `bin.size = "polygons"` for segmented
 cells) or `LoadXenium()` (Xenium), with cell types in `obj$cell_type`:
 
-``` r
+```r
 coords <- GetTissueCoordinates(obj)
 df <- data.frame(x = coords$x, y = coords$y, label = obj$cell_type[coords$cell])
 ```
@@ -103,7 +103,7 @@ ids <- c(anterior_1 = "V1_Mouse_Brain_Sagittal_Anterior",
          anterior_2 = "V1_Mouse_Brain_Sagittal_Anterior_Section_2",
          posterior_1 = "V1_Mouse_Brain_Sagittal_Posterior",
          posterior_2 = "V1_Mouse_Brain_Sagittal_Posterior_Section_2")
-cache <- tools::R_user_dir("friendlyspots", "cache")
+cache <- tools::R_user_dir("friendlycells", "cache")
 
 seurat_objects <- lapply(ids, function(id) {
   dir <- file.path(cache, id)
@@ -161,7 +161,7 @@ pixels) and labels:
 
 
 ``` r
-library(friendlyspots)
+library(friendlycells)
 
 samples <- lapply(seurat_objects, function(cells) {
   coords <- GetTissueCoordinates(cells)
@@ -202,7 +202,7 @@ plot_similarity(sim)
 
 ## Citation
 
-The algorithm and original implementation of `friendlyspots` are based on the
+The algorithm and original implementation of `friendlycells` are based on the
 methodology in:
 
 - Durkin _et al_. "Functional integration of an autologous engineered esophagus

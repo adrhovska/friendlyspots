@@ -1,4 +1,4 @@
-Package: friendlyspots
+Package: friendlycells
 Title: Spatial Similarity of Spatial Transcriptomics Samples
 Version: 0.1.0
 Authors@R: c(
@@ -18,8 +18,8 @@ Description: Computes the similarity between spatial transcriptomics
     samples from counts of label-to-label connections between neighboring
     spots or cells.
 License: GPL (>= 3)
-URL: https://github.com/george-hall-ucl/friendlyspots
-BugReports: https://github.com/george-hall-ucl/friendlyspots/issues
+URL: https://github.com/george-hall-ucl/friendlycells
+BugReports: https://github.com/george-hall-ucl/friendlycells/issues
 Imports:
     dbscan,
     deldir,

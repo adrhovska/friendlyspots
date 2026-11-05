@@ -4,7 +4,7 @@
 # Absolute image URLs so figures also show on PyPI
 knitr::opts_knit$set(base.url = paste0(
   "https://raw.githubusercontent.com/",
-  "george-hall-ucl/friendlyspots/main/python/"
+  "george-hall-ucl/friendlycells/main/python/"
 ))
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", dpi = 150,
                       fig.path = "figures/README-", fig.cap = "",
@@ -13,7 +13,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", dpi = 150,
 ```
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/george-hall-ucl/friendlyspots/main/assets/logo.gif" width="210" alt="friendlyspots logo">
+  <img src="https://raw.githubusercontent.com/george-hall-ucl/friendlycells/main/assets/logo.gif" width="210" alt="friendlycells logo">
 </p>
 
 Compute similarity between spatial transcriptomics samples based on which
@@ -22,18 +22,18 @@ labels (e.g. cell types) border one another.
 ## Installation
 
 ```bash
-pip install "git+https://github.com/george-hall-ucl/friendlyspots#subdirectory=python"
+pip install "git+https://github.com/george-hall-ucl/friendlycells#subdirectory=python"
 ```
 
 Requires `pandas`, `numpy` and `scipy`. Also available as an
-[R package](https://github.com/george-hall-ucl/friendlyspots/tree/main/R).
+[R package](https://github.com/george-hall-ucl/friendlycells/tree/main/R).
 
 ## Usage
 
 Compatible with Visium, Visium HD (binned or segmented) and Xenium.
 
 ```python
-from friendlyspots import spatial_similarity
+from friendlycells import spatial_similarity
 
 # One DataFrame per sample, with columns x, y (positions, e.g. in pixels or
 # micrometres) and label (see Extracting positions below)
@@ -111,7 +111,7 @@ with each spot labelled by its most enriched of five marker genes.
 ```{python setup, message = FALSE, warning = FALSE, results = "hide"}
 # To rebuild this README from README.Rmd, run knitr::knit("README.Rmd") in R
 # from the python/ directory, with RETICULATE_PYTHON set to a Python that has
-# friendlyspots installed (rmarkdown::render breaks the <details> block).
+# friendlycells installed (rmarkdown::render breaks the <details> block).
 # Requires squidpy, matplotlib and seaborn.
 from pathlib import Path
 
@@ -128,7 +128,7 @@ ids = {
     "posterior_1": "V1_Mouse_Brain_Sagittal_Posterior",
     "posterior_2": "V1_Mouse_Brain_Sagittal_Posterior_Section_2",
 }
-cache = Path.home() / ".cache" / "friendlyspots"
+cache = Path.home() / ".cache" / "friendlycells"
 
 adatas = {}
 labels = {}
@@ -194,7 +194,7 @@ Each sample is a DataFrame of spot positions (in full-resolution image
 pixels) and labels:
 
 ```{python samples}
-from friendlyspots import spatial_similarity
+from friendlycells import spatial_similarity
 
 samples = {
     name: pd.DataFrame({
@@ -219,7 +219,7 @@ plot_similarity(sim)
 
 ## Citation
 
-The algorithm and original implementation of `friendlyspots` are based on the
+The algorithm and original implementation of `friendlycells` are based on the
 methodology in:
 
 - Durkin _et al_. "Functional integration of an autologous engineered esophagus

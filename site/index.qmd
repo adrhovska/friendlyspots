@@ -7,10 +7,10 @@ knitr:
 ---
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/george-hall-ucl/friendlyspots/main/assets/logo.gif" width="210" alt="friendlyspots logo">
+  <img src="https://raw.githubusercontent.com/george-hall-ucl/friendlycells/main/assets/logo.gif" width="210" alt="friendlycells logo">
 </p>
 
-`friendlyspots` computes similarity between spatial transcriptomics samples
+`friendlycells` computes similarity between spatial transcriptomics samples
 based on which labels (e.g. cell types) border one another. Available for R
 and Python.
 
@@ -22,7 +22,7 @@ Compatible with Visium, Visium HD (binned or segmented) and Xenium.
 ## R
 
 ```r
-remotes::install_github("george-hall-ucl/friendlyspots", subdir = "R")
+remotes::install_github("george-hall-ucl/friendlycells", subdir = "R")
 ```
 
 Requires `dbscan` and `deldir`.
@@ -30,7 +30,7 @@ Requires `dbscan` and `deldir`.
 ## Python
 
 ```bash
-pip install "git+https://github.com/george-hall-ucl/friendlyspots#subdirectory=python"
+pip install "git+https://github.com/george-hall-ucl/friendlycells#subdirectory=python"
 ```
 
 Requires `pandas`, `numpy` and `scipy`.
@@ -46,7 +46,7 @@ Give `spatial_similarity()` one data frame per sample, with columns `x`, `y`
 ## R
 
 ```r
-library(friendlyspots)
+library(friendlycells)
 
 samples <- list(sample_1 = df1, sample_2 = df2, sample_3 = df3)
 sim <- spatial_similarity(samples)
@@ -55,7 +55,7 @@ sim <- spatial_similarity(samples)
 ## Python
 
 ```python
-from friendlyspots import spatial_similarity
+from friendlycells import spatial_similarity
 
 samples = {"sample_1": df1, "sample_2": df2, "sample_3": df3}
 sim = spatial_similarity(samples)
@@ -92,7 +92,7 @@ ids <- c(anterior_1 = "V1_Mouse_Brain_Sagittal_Anterior",
          anterior_2 = "V1_Mouse_Brain_Sagittal_Anterior_Section_2",
          posterior_1 = "V1_Mouse_Brain_Sagittal_Posterior",
          posterior_2 = "V1_Mouse_Brain_Sagittal_Posterior_Section_2")
-cache <- tools::R_user_dir("friendlyspots", "cache")
+cache <- tools::R_user_dir("friendlycells", "cache")
 
 seurat_objects <- lapply(ids, function(id) {
   dir <- file.path(cache, id)
@@ -148,7 +148,7 @@ pixels) and labels:
 
 ```{r}
 #| label: r-samples
-library(friendlyspots)
+library(friendlycells)
 
 samples <- lapply(seurat_objects, function(cells) {
   coords <- GetTissueCoordinates(cells)
@@ -203,7 +203,7 @@ ids = {
     "posterior_1": "V1_Mouse_Brain_Sagittal_Posterior",
     "posterior_2": "V1_Mouse_Brain_Sagittal_Posterior_Section_2",
 }
-cache = Path.home() / ".cache" / "friendlyspots"
+cache = Path.home() / ".cache" / "friendlycells"
 
 adatas = {}
 labels = {}
@@ -269,7 +269,7 @@ pixels) and labels:
 ```{python}
 #| label: py-samples
 #| jupyter_compat: true
-from friendlyspots import spatial_similarity
+from friendlycells import spatial_similarity
 
 samples = {
     name: pd.DataFrame({
@@ -309,7 +309,7 @@ sections, while anterior and posterior sections are dissimilar.
 
 ## Citation
 
-The algorithm and original implementation of `friendlyspots` are based on the
+The algorithm and original implementation of `friendlycells` are based on the
 methodology in:
 
 - Durkin _et al_. "Functional integration of an autologous engineered esophagus

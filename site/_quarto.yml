@@ -1,5 +1,5 @@
 # Render locally with `quarto render` from site/, with the R package installed
-# and RETICULATE_PYTHON set to a Python that has friendlyspots, squidpy,
+# and RETICULATE_PYTHON set to a Python that has friendlycells, squidpy,
 # matplotlib and seaborn. Commit _freeze/ so CI can publish without running
 # any code.
 project:
@@ -12,9 +12,9 @@ execute:
   freeze: auto
 
 website:
-  title: "friendlyspots"
-  site-url: https://george-hall-ucl.github.io/friendlyspots/
-  repo-url: https://github.com/george-hall-ucl/friendlyspots
+  title: "friendlycells"
+  site-url: https://george-hall-ucl.github.io/friendlycells/
+  repo-url: https://github.com/george-hall-ucl/friendlycells
   favicon: images/logo.png
   navbar:
     logo: images/logo.png
@@ -24,7 +24,7 @@ website:
       - reference.qmd
     right:
       - icon: github
-        href: https://github.com/george-hall-ucl/friendlyspots
+        href: https://github.com/george-hall-ucl/friendlycells
   page-footer:
     center: "Copyright (C) 2026 University College London. Licensed under GPL-3.0-or-later."
 

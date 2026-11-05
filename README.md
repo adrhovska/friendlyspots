@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.gif" width="210" alt="friendlyspots logo">
+  <img src="assets/logo.gif" width="210" alt="friendlycells logo">
 </p>
 
 Compute similarity between spatial transcriptomics samples based on which

@@ -3,7 +3,7 @@
 
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/george-hall-ucl/friendlyspots/main/assets/logo.gif" width="210" alt="friendlyspots logo">
+  <img src="https://raw.githubusercontent.com/george-hall-ucl/friendlycells/main/assets/logo.gif" width="210" alt="friendlycells logo">
 </p>
 
 Compute similarity between spatial transcriptomics samples based on which
@@ -12,18 +12,18 @@ labels (e.g. cell types) border one another.
 ## Installation
 
 ```bash
-pip install "git+https://github.com/george-hall-ucl/friendlyspots#subdirectory=python"
+pip install "git+https://github.com/george-hall-ucl/friendlycells#subdirectory=python"
 ```
 
 Requires `pandas`, `numpy` and `scipy`. Also available as an
-[R package](https://github.com/george-hall-ucl/friendlyspots/tree/main/R).
+[R package](https://github.com/george-hall-ucl/friendlycells/tree/main/R).
 
 ## Usage
 
 Compatible with Visium, Visium HD (binned or segmented) and Xenium.
 
 ```python
-from friendlyspots import spatial_similarity
+from friendlycells import spatial_similarity
 
 # One DataFrame per sample, with columns x, y (positions, e.g. in pixels or
 # micrometres) and label (see Extracting positions below)
@@ -62,7 +62,7 @@ For Visium read with scanpy or squidpy, and for tables read with
 `adata = sdata.tables["square_008um"]`), with cell types in
 `adata.obs["cell_type"]`:
 
-``` python
+```python
 x, y = adata.obsm["spatial"].T
 df = pd.DataFrame({"x": x, "y": y, "label": adata.obs["cell_type"]})
 ```
@@ -70,7 +70,7 @@ df = pd.DataFrame({"x": x, "y": y, "label": adata.obs["cell_type"]})
 For Visium HD segmented cells, `sdata.tables["cell_segmentations"]` has no
 `obsm["spatial"]`, so take the centroids of the cells' outlines instead:
 
-``` python
+```python
 adata = sdata.tables["cell_segmentations"]
 cells = sdata.shapes[adata.obs["region"].iloc[0]].centroid.loc[adata.obs_names]
 df = pd.DataFrame({"x": cells.x, "y": cells.y, "label": adata.obs["cell_type"]})
@@ -102,7 +102,7 @@ with each spot labelled by its most enriched of five marker genes.
 ``` python
 # To rebuild this README from README.Rmd, run knitr::knit("README.Rmd") in R
 # from the python/ directory, with RETICULATE_PYTHON set to a Python that has
-# friendlyspots installed (rmarkdown::render breaks the <details> block).
+# friendlycells installed (rmarkdown::render breaks the <details> block).
 # Requires squidpy, matplotlib and seaborn.
 from pathlib import Path
 
@@ -119,7 +119,7 @@ ids = {
     "posterior_1": "V1_Mouse_Brain_Sagittal_Posterior",
     "posterior_2": "V1_Mouse_Brain_Sagittal_Posterior_Section_2",
 }
-cache = Path.home() / ".cache" / "friendlyspots"
+cache = Path.home() / ".cache" / "friendlycells"
 
 adatas = {}
 labels = {}
@@ -186,7 +186,7 @@ pixels) and labels:
 
 
 ``` python
-from friendlyspots import spatial_similarity
+from friendlycells import spatial_similarity
 
 samples = {
     name: pd.DataFrame({
@@ -210,7 +210,7 @@ print(samples["anterior_1"].head())
 plot_slices(samples)
 ```
 
-<img src="https://raw.githubusercontent.com/george-hall-ucl/friendlyspots/main/python/figures/README-slices-1.png" alt="" width="75%" style="display: block; margin: auto;" />
+<img src="https://raw.githubusercontent.com/george-hall-ucl/friendlycells/main/python/figures/README-slices-1.png" alt="" width="75%" style="display: block; margin: auto;" />
 
 
 ``` python
@@ -225,11 +225,11 @@ print(sim.round(2))
 plot_similarity(sim)
 ```
 
-<img src="https://raw.githubusercontent.com/george-hall-ucl/friendlyspots/main/python/figures/README-similarity-3.png" alt="" width="50%" style="display: block; margin: auto;" />
+<img src="https://raw.githubusercontent.com/george-hall-ucl/friendlycells/main/python/figures/README-similarity-3.png" alt="" width="50%" style="display: block; margin: auto;" />
 
 ## Citation
 
-The algorithm and original implementation of `friendlyspots` are based on the
+The algorithm and original implementation of `friendlycells` are based on the
 methodology in:
 
 - Durkin _et al_. "Functional integration of an autologous engineered esophagus

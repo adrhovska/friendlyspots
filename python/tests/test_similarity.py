@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from friendlyspots import spatial_similarity
-from friendlyspots.similarity import _default_radius, _neighbor_pairs, _nn_distances
+from friendlycells import spatial_similarity
+from friendlycells.similarity import _default_radius, _neighbor_pairs, _nn_distances
 
 
 def visium(array_row, array_col, label):
