@@ -2,14 +2,23 @@
 #'
 #' @param samples Named list of data frames, one per sample, with columns
 #'   `array_row`, `array_col` (hexagonal grid array coordinates) and `label`.
-#' @param normalize Divide each sample's connection counts by their total.
+#' @param sample_normalize Divide each sample's connection counts by their
+#'   total.
+#' @param label_normalize Control for the size of each label: add one
+#'   connection of every label to itself, divide each count by the square root
+#'   of the two labels' connections to themselves (so each label's connections
+#'   to itself become 1), then divide each label's counts by their sum (its
+#'   degree), so each label's counts become the proportions of its neighbors'
+#'   labels, as in one step of a random walk. Applied after pooling. Use
+#'   instead of `sample_normalize`: set `sample_normalize = FALSE`.
 #' @param pools Optional named list mapping pool names to sample names;
 #'   connection counts are summed within each pool.
 #' @param only_transitions If `TRUE`, only count connections between spots with
 #'   distinct labels (i.e. borders); does not count connections between spots
 #'   with the same label.
+#' @param normalize Deprecated; use `sample_normalize`.
 #' @return Symmetric similarity matrix with values in \[0, 1\], or `NA` for
-#'   samples with no neighboring spots when `normalize = TRUE`.
+#'   samples with no neighboring spots when `sample_normalize = TRUE`.
 #' @examples
 #' samples <- list(
 #'   a = data.frame(array_row = c(0, 0, 1), array_col = c(0, 2, 1),
@@ -23,8 +32,17 @@
 #' spatial_similarity(samples, pools = list(ab = c("a", "b"), c = "c"))
 #' @importFrom stats dist
 #' @export
-spatial_similarity <- function(samples, normalize = TRUE, pools = NULL,
-                               only_transitions = FALSE) {
+spatial_similarity <- function(samples, sample_normalize = TRUE,
+                               label_normalize = FALSE, pools = NULL,
+                               only_transitions = FALSE, normalize = NULL) {
+  if (!is.null(normalize)) {
+    warning("`normalize` is deprecated; use `sample_normalize`.")
+    sample_normalize <- normalize
+  }
+  if (sample_normalize && label_normalize) {
+    stop("Use either sample_normalize or label_normalize, not both: ",
+         "set sample_normalize = FALSE to use label_normalize.")
+  }
   if (anyNA(unlist(lapply(samples, function(s) as.character(s$label))))) {
     # e.g. read.csv() reads a label literally called "NA" as missing
     warning("Some labels are 'NA'. These will be treated as a label called ",
@@ -44,7 +62,15 @@ spatial_similarity <- function(samples, normalize = TRUE, pools = NULL,
       colSums(counts[p, , drop = FALSE])
     }))
   }
-  if (normalize) {
+  if (label_normalize) {
+    n <- length(labels)
+    counts <- t(apply(counts, 1, function(v) {
+      m <- matrix(v, n, n, byrow = TRUE) + diag(n)
+      m <- m / sqrt(outer(diag(m), diag(m)))
+      as.vector(t(m / rowSums(m)))
+    }))
+  }
+  if (sample_normalize) {
     empty <- rowSums(counts) == 0
     if (any(empty)) {
       warning("Similarities are NA for samples with no neighboring spots",
