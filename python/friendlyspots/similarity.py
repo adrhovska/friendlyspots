@@ -52,9 +52,6 @@ def spatial_similarity(
     if pools is not None:
         counts = pd.DataFrame({name: counts.loc[members].sum() for name, members in pools.items()}).T
     if label_normalize:
-        # One table per sample: add a self-connection to every label, scale so
-        # each label's connections to itself are 1, then divide by each label's
-        # degree (row sum)
         x = counts.to_numpy(dtype=float).reshape(-1, len(labels), len(labels)) + np.eye(len(labels))
         d = np.sqrt(np.diagonal(x, axis1=1, axis2=2))
         x = x / (d[:, :, None] * d[:, None, :])
