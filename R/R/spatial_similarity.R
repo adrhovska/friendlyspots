@@ -10,13 +10,15 @@
 #' @param labels Name of the column holding the labels (e.g. cell types).
 #' @param sample_normalize Divide each sample's connection counts by their
 #'   total to control for sample size.
-#' @param label_normalize Control for the size of each label: add one
-#'   connection of every label to itself, divide each count by the square root
-#'   of the two labels' connections to themselves (so each label's connections
-#'   to itself become 1), then divide each label's counts by their sum (its
-#'   degree), so each label's counts become the proportions of its neighbors'
-#'   labels, as in one step of a random walk. Applied after pooling. Use
-#'   instead of `sample_normalize`: set `sample_normalize = FALSE`.
+#' @param label_normalize Control for the size of each label (#NEW): divide
+#'   each count by the count expected if connections were made at random given
+#'   each label's degree (its total connections, including to itself), as in
+#'   the configuration model: observed / expected = A_ij * 2m / (d_i d_j),
+#'   where 2m is the sum of all counts. 1 means as often as chance, above 1
+#'   enriched, below 1 avoided; entries of labels absent from a sample are 0.
+#'   Then log2 (#NEW), with log2(0) set to 0.
+#'   Applied after pooling. Use instead of `sample_normalize`: set
+#'   `sample_normalize = FALSE`.
 #' @param pools Optional named list mapping pool names to sample names;
 #'   connection counts are summed within each pool.
 #' @param only_transitions If `TRUE`, only count connections between spots with
@@ -120,9 +122,15 @@ spatial_similarity <- function(samples, x, y, labels,
   if (label_normalize) {
     n <- length(all_labels)
     counts <- t(apply(counts, 1, function(v) {
-      m <- matrix(v, n, n, byrow = TRUE) + diag(n)
-      m <- m / sqrt(outer(diag(m), diag(m)))
-      as.vector(t(m / rowSums(m)))
+      # NEW: configuration-model null, replacing the self-connection scaling
+      m <- matrix(v, n, n, byrow = TRUE)
+      expected <- outer(rowSums(m), rowSums(m))
+      m <- m * sum(m) / expected
+      # NEW: absent labels (degree 0) have no expected count; set them to 0
+      m[expected == 0] <- 0
+      # NEW: log2 so 2x and 0.5x are equally far from chance; log2(0) set to 0
+      m[m > 0] <- log2(m[m > 0])
+      as.vector(t(m))
     }))
   }
   if (sample_normalize) {

@@ -30,13 +30,15 @@ def spatial_similarity(
     labels: name of the column holding the labels (e.g. cell types).
     sample_normalize: divide each sample's connection counts by their total
         to control for sample size.
-    label_normalize: control for the size of each label: add one connection
-        of every label to itself, divide each count by the square root of the
-        two labels' connections to themselves (so each label's connections to
-        itself become 1), then divide each label's counts by their sum (its
-        degree), so each label's counts become the proportions of its
-        neighbors' labels, as in one step of a random walk. Applied after
-        pooling. Use instead of sample_normalize: set sample_normalize=False.
+    label_normalize: control for the size of each label (#NEW): divide each
+        count by the count expected if connections were made at random given
+        each label's degree (its total connections, including to itself), as
+        in the configuration model: observed / expected = A_ij * 2m / (d_i
+        d_j), where 2m is the sum of all counts. 1 means as often as chance,
+        above 1 enriched, below 1 avoided; entries of labels absent from a
+        sample are 0. Then log2 (#NEW), with log2(0) set to 0. Applied after
+        pooling. Use instead of sample_normalize:
+        set sample_normalize=False.
     pools: optional dict mapping pool names to lists of sample names;
         connection counts are summed within each pool.
     only_transitions: if True, only count connections between spots with
@@ -130,12 +132,16 @@ def spatial_similarity(
 
 
 def _label_normalize(counts, n):
-    """Each sample's n x n table, with a self-connection added to each label,
-    scaled by its labels' self-connections, then by each label's degree."""
-    m = counts.to_numpy(dtype=float).reshape(-1, n, n) + np.eye(n)
-    self_links = np.sqrt(np.diagonal(m, axis1=1, axis2=2))
-    m = m / (self_links[:, :, None] * self_links[:, None, :])
-    m = m / m.sum(axis=2, keepdims=True)
+    """Each sample's n x n table as observed / expected counts, where the
+    expected count between labels i and j is d_i * d_j / 2m."""
+    m = counts.to_numpy(dtype=float).reshape(-1, n, n)
+    degree = m.sum(axis=2)
+    expected = degree[:, :, None] * degree[:, None, :]
+    total = degree.sum(axis=1)[:, None, None]
+    # absent labels have no expected count; set to 0
+    m = np.divide(m * total, expected, out=np.zeros_like(m), where=expected > 0)
+    # log2 so 2x and 0.5x are equally far from chance; log2(0) set to 0 (the same as chance)
+    m = np.log2(m, out=np.zeros_like(m), where=m > 0)
     return pd.DataFrame(
         m.reshape(len(counts), -1), index=counts.index, columns=counts.columns
     )
