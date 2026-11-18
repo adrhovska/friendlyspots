@@ -122,13 +122,12 @@ spatial_similarity <- function(samples, x, y, labels,
   if (label_normalize) {
     n <- length(all_labels)
     counts <- t(apply(counts, 1, function(v) {
-      # NEW: configuration-model null, replacing the self-connection scaling
       m <- matrix(v, n, n, byrow = TRUE)
       expected <- outer(rowSums(m), rowSums(m))
       m <- m * sum(m) / expected
-      # NEW: absent labels (degree 0) have no expected count; set them to 0
+      # absent labels have no expected count; set to 0
       m[expected == 0] <- 0
-      # NEW: log2 so 2x and 0.5x are equally far from chance; log2(0) set to 0
+      # log2 so 2x and 0.5x are equally far from chance; log2(0) set to 0 (the same as chance)
       m[m > 0] <- log2(m[m > 0])
       as.vector(t(m))
     }))

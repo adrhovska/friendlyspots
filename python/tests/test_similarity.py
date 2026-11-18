@@ -93,17 +93,18 @@ def test_normalize():
 
 
 def test_label_normalize():
-    """label_normalize scales by self-connections, then by degree."""
-    # A's counts (a-a 2, a-b 2, b-b 0), with a self-connection added (3, 2, 1)
-    # and divided by sqrt(3 * 1) where a meets b, give each label 1 to itself
-    # and 2 / sqrt(3) to the other; B's (2, 1, 0) give 1 / sqrt(3); C's are
-    # all to itself. p and q are A's and B's shares of each label to itself
-    p = 1 / (1 + 2 / np.sqrt(3))
-    q = 1 / (1 + 1 / np.sqrt(3))
+    """label_normalize gives log2 of observed / expected counts, d_i d_j / 2m."""
+    # A's counts (a-a 2, a-b 2, b-b 0) have degrees 4 and 2 and 2m = 6, so a-a
+    # is 2 * 6 / 16 = 3/4 and a-b 3/2; B's (2, 1, 0) give 8/9 and 4/3; C's
+    # only b-b gives 1. log2 of 1, and of the 0s, is 0, so C is all 0
+    def dist(aa, ab):
+        return np.sqrt(np.log2(aa) ** 2 + 2 * np.log2(ab) ** 2)
+
+    dmax = dist(3 / 4, 3 / 2)
     sim = spatial_similarity(
         SAMPLES, "x", "y", "label", sample_normalize=False, label_normalize=True
     )
-    assert_sim(sim, 1 - (q - p) / (1 - p), 0, 1 - (1 - q) / (1 - p))
+    assert_sim(sim, 1 - dist(27 / 32, 9 / 8) / dmax, 0, 1 - dist(8 / 9, 4 / 3) / dmax)
     with pytest.raises(ValueError, match="not both"):
         spatial_similarity(SAMPLES, "x", "y", "label", label_normalize=True)
 

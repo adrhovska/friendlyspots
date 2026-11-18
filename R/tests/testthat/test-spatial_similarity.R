@@ -84,17 +84,16 @@ test_that("sample_normalize divides counts by their total", {
   expect_sim(sim, 1 - (sqrt(6) / 12) / dmax, 1 - sqrt(4 / 3) / dmax, 0)
 })
 
-test_that("label_normalize scales by self-connections, then by degree", {
-  # A's counts (a-a 2, a-b 2, b-b 0), with a self-connection added (3, 2, 1)
-  # and divided by sqrt(3 * 1) where a meets b, give each label 1 to itself
-  # and 2 / sqrt(3) to the other; B's (2, 1, 0) give 1 / sqrt(3); C's are all
-  # to itself. p and q are A's and B's shares of each label to itself
-  p <- 1 / (1 + 2 / sqrt(3))
-  q <- 1 / (1 + 1 / sqrt(3))
+test_that("label_normalize gives log2 of observed / expected counts", {
+  # A's counts (a-a 2, a-b 2, b-b 0) have degrees 4 and 2 and 2m = 6, so a-a
+  # is 2 * 6 / 16 = 3/4 and a-b 3/2; B's (2, 1, 0) give 8/9 and 4/3; C's only
+  # b-b gives 1. log2 of 1, and of the 0s, is 0, so C is all 0
+  dist <- function(aa, ab) sqrt(log2(aa)^2 + 2 * log2(ab)^2)
+  dmax <- dist(3 / 4, 3 / 2)
   sim <- spatial_similarity(samples, "x", "y", "label",
     sample_normalize = FALSE, label_normalize = TRUE
   )
-  expect_sim(sim, 1 - (q - p) / (1 - p), 0, 1 - (1 - q) / (1 - p))
+  expect_sim(sim, 1 - dist(27 / 32, 9 / 8) / dmax, 0, 1 - dist(8 / 9, 4 / 3) / dmax)
   expect_error(
     spatial_similarity(samples, "x", "y", "label", label_normalize = TRUE),
     "not both"
