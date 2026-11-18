@@ -94,6 +94,7 @@ def test_normalize():
 
 def test_label_normalize():
     """label_normalize gives log2 of observed / expected counts, d_i d_j / 2m."""
+
     # A's counts (a-a 2, a-b 2, b-b 0) have degrees 4 and 2 and 2m = 6, so a-a
     # is 2 * 6 / 16 = 3/4 and a-b 3/2; B's (2, 1, 0) give 8/9 and 4/3; C's
     # only b-b gives 1. log2 of 1, and of the 0s, is 0, so C is all 0
